@@ -7,17 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NewsApi.Models;
 
-//ПРОБЛЕМЫ: 1) пут метод не меняет сущностей, которые уже существуют
-//        2) пОДТЯЖКА СУЩНОСТЕЙ ИЗ КТОНТЕКСТА - ПОЧЕМУ ТО НЕ РАБОТАЕТ - исправлено
-            //3) Не возвращать некоторые поля наших сущностей - решено
-            //4) Ошибка при неправлиьном выборе категории или коммента в посте - решено
-            //5) реализовать пут метод - решено частично - почему категория не удаляется
-            //6) можно не возвращать навиг свойства а только айдишники - через селект решается - остановился на  категориях 
-            //7) Метод пут с биндингами и дин. добавлением данных 
-
-
 namespace NewsApi.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class NewsController : ControllerBase
@@ -29,40 +21,42 @@ namespace NewsApi.Controllers
             _context = context;
         }
 
-        /* GET: api/News
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<News>>> GetNews()
-        //{
-        //    var news = _context.News.Include(p => p.Categories).Include(p => p.Comments);
-        //    foreach (var obj in news)
-        //    {
-        //        foreach (var obj1 in obj.Categories)
-        //            obj1.News = null;
-        //        foreach (var obj1 in obj.Comments)
-        //            obj1.CurrNews = null;
-        //    }
-        //    return Ok(news);
-        //}*/
-
+        ///<summary>Returning all the News</summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<News>>> GetNews()
         {
-            return await _context.News.Include(p=>p.Categories).Include(p=>p.Comments).AsNoTracking().ToListAsync();
+            return Ok(await _context.News.Include(p=>p.Categories).Include(p=>p.Comments).Select(p=>new { p.Id, p.Img, p.Name, p.ShortDesc, p.TimePublication, p.Text, p.Categories, p.Comments }).AsNoTracking().ToListAsync());
         }
 
+        ///<summary>Returning the News with unique ID</summary>
+        ///<param name="id"></param>
         // GET: api/News/5
         [HttpGet("{id}")]
         public async Task<ActionResult<News>> GetNews(int id)
         {
 
-            var news = _context.News.Include(p => p.Categories).Include(p => p.Comments).Where(p => p.Id == id).First();
+            var news = await _context.News.Include(p => p.Categories).Include(p => p.Comments).Where(p => p.Id == id).Select(p => new { p.Id, p.Img, p.Name, p.ShortDesc, p.TimePublication, p.Text, p.Categories, p.Comments }).FirstAsync();
             if (news == null)
                 return NotFound();
             return Ok(news);
         }
 
-        // PUT: api/News/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        ///<summary>Updating the News with unique ID</summary>
+        ///<param name="id"></param>
+        ///<remarks>
+        ///
+        ///Sample request:
+        ///
+        ///    {
+        ///         "id": 1,
+        ///         "Name": "The changed Name!",
+        ///         "ShortDesc": "Some changed descryption.",
+        ///         "Text": "Some changed text.",
+        ///         "TimePublication": "31.12.1999 23:59:59",
+        ///         "CategoriesId": []
+        ///         "CommentsId": []
+        ///    }
+        /// </remarks>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutNews(int id,[Bind("Img", "Name", "ShortDesc", "Text", "TimePublication", "CategoriesId", "CommentsId")] News news)
         {
@@ -103,18 +97,7 @@ namespace NewsApi.Controllers
             return NoContent();
         }
 
-        /* POST: api/News
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<News>> PostNews(News news)
-        //{
-        //    _context.News.Add(news);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetNews", new { id = news.Id }, news);
-        //}*/
-
-        // метод с передачой айдишек категорий и комментов СДЕЛАЙ ПРОВЕРКУ АЙДИ КОММЕНТОВ И КАТЕГОРИЙ НА ИХ НАЛИЧИЕ
+        ///<summary>Creating a new News entity</summary>
         [HttpPost]
         public async Task<ActionResult<News>> PostNews([Bind("Name", "Img", "ShortDesc", "Text", "CategoriesId", "CommentsId")] News news)
         {
@@ -144,7 +127,7 @@ namespace NewsApi.Controllers
             return CreatedAtAction(nameof(GetNews), new { id = news.Id }, "Created news' ID is " + news.Id);
         }
 
-        // DELETE: api/News/id
+        ///<summary>Deleting the News with unique ID</summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNews(int id)
         {

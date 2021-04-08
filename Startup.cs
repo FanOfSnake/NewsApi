@@ -1,20 +1,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.IO;
+using Microsoft.OpenApi.Models;
 using NewsApi.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 
 namespace NewsApi
 {
@@ -36,8 +30,26 @@ namespace NewsApi
             services.AddDbContext<NewsContext>();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "NewsApi", Version = "v1" });
+                c.SwaggerDoc(
+                    "v1", new OpenApiInfo 
+                    { 
+                        Title = "NewsApi",
+                        Version = "v1",
+                        Description = "Простейшая WEB-API для работы с новостным блоком.",
+                        Contact = new OpenApiContact
+                        {
+                            Name = "Шаукат Хайруллин",
+                            Email = "shaukatk@list.ru",
+                            Url = new Uri("https://vk.com/fan_of_snake")
+                        }
+                    });
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
+
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
