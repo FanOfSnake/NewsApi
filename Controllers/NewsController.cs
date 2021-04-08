@@ -47,7 +47,7 @@ namespace NewsApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<News>>> GetNews()
         {
-            return await _context.News.Include(p=>p.Categories).Include(p=>p.Comments).AsNoTracking().ToListAsync();
+            return Ok(await _context.News.Include(p=>p.Categories).Include(p=>p.Comments).Select(p=>new { p.Id, p.Img, p.Name, p.ShortDesc, p.TimePublication, p.Text, p.Categories, p.Comments }).AsNoTracking().ToListAsync());
         }
 
         // GET: api/News/5
@@ -55,7 +55,7 @@ namespace NewsApi.Controllers
         public async Task<ActionResult<News>> GetNews(int id)
         {
 
-            var news = _context.News.Include(p => p.Categories).Include(p => p.Comments).Where(p => p.Id == id).First();
+            var news = await _context.News.Include(p => p.Categories).Include(p => p.Comments).Where(p => p.Id == id).Select(p => new { p.Id, p.Img, p.Name, p.ShortDesc, p.TimePublication, p.Text, p.Categories, p.Comments }).FirstAsync();
             if (news == null)
                 return NotFound();
             return Ok(news);
