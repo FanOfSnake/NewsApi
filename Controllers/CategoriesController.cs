@@ -20,12 +20,12 @@ namespace NewsApi.Controllers
         {
             _context = context;
         }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+
+        ///<summary>Returning all the categories</summary>
+        ///<returns>All the categories</returns>
+        ///<response code="200">Returning all the categories</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
             var categories = _context.Categories.Include(p => p.News);
@@ -35,56 +35,46 @@ namespace NewsApi.Controllers
             return Ok(await categories.Select(p => new { p.Id, p.Name, p.Desc, p.NewsId }).ToListAsync());
         }
 
-        // GET: api/Categories/5
+        ///<summary>Returning the category with the unique ID</summary>
+        ///<param name="id"></param>
+        ///<response code="404">There is no category with pointed ID!</response>
+        ///<response code="200">Returning the category with the unique ID</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<Category>> GetCategory(int id)
         {
             var category = _context.Categories.Include(p => p.News).Where(p=>p.Id == id);
             if (!category.Any())
-                return NotFound();
+                return NotFound("There is no category with pointed ID!");
             foreach (var i in category.First().News)
                 category.First().NewsId.Add(i.Id);
 
             return Ok(await category.Select(p => new { p.Id, p.Name, p.Desc, p.NewsId }).ToListAsync());
         }
 
-        /* PUT: api/Categories/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutCategory(int id, Category category)
-        //{
-        //    if (id != category.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(category).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!CategoryExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}*/
-
+        ///<summary>Updating the category with unique ID</summary>
+        ///<response code="400">The entity you pointed doesn't exist!</response>
+        ///<response code="204">The category was successfully changed!</response>
+        ///<remarks>
+        ///
+        ///Sample request:
+        ///
+        ///    {
+        ///         "id": 1,
+        ///         "Name": "The changed Name!",
+        ///         "Desc": "The changed description!",
+        ///         "NewsId": []
+        ///    }
+        /// </remarks>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PutCategory(int id, [Bind("Id", "Name", "Desc", "NewsId")]Category category)
         {
             if (id != category.Id)
             {
-                return BadRequest();
+                return BadRequest("The category you pointed doesn't exist!");
             }
 
             var news = _context.News;
@@ -107,8 +97,21 @@ namespace NewsApi.Controllers
             return NoContent();
         }
 
-        // POST: api/Categories
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        ///<summary>Creating a new category's entity</summary>
+        ///<response code="400">There is no news with pointed ID!</response>
+        ///<response code="201">Returning the category which was created</response>
+        ///<remarks>
+        ///Sample request:
+        ///
+        ///    {
+        ///         "Name": "The created Name!",
+        ///         "Desc": "The created description!",
+        ///         "NewsId": []
+        ///    }
+        /// </remarks>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost]
         public async Task<ActionResult<Category>> PostCategory([Bind("Name", "Decs", "NewsId")]Category category)
         {
@@ -117,7 +120,7 @@ namespace NewsApi.Controllers
             {
                 var OneNews = news.Find(p => p.Id == i);
                 if (OneNews == null)
-                    return BadRequest();
+                    return BadRequest("There is no news with pointed ID!");
                 category.News.Add(OneNews);
             }
             _context.Categories.Add(category);
@@ -126,25 +129,25 @@ namespace NewsApi.Controllers
             return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, "Created category's ID is " + category.Id);
         }
 
-        // DELETE: api/Categories/5
+        ///<summary>Deleting the category with unique ID</summary>
+        ///<param name="id"></param>
+        ///<response code="404">There is no category with pointed ID!</response>
+        ///<response code="204">Returning NoContent in case of success</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
+            var category = _context.Categories.Where(p=>p.Id == id);
+            if (!await category.AnyAsync())
             {
-                return NotFound();
+                return NotFound("There is no category with pointed ID!");
             }
 
-            _context.Categories.Remove(category);
+            _context.Categories.Remove(category.First());
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool CategoryExists(int id)
-        {
-            return _context.Categories.Any(e => e.Id == id);
         }
     }
 }

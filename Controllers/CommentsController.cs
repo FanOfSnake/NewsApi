@@ -9,6 +9,7 @@ using NewsApi.Models;
 
 namespace NewsApi.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class CommentsController : ControllerBase
@@ -20,75 +21,56 @@ namespace NewsApi.Controllers
             _context = context;
         }
 
-        // GET: api/Comments
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Comment>>> GetComments()
-        //{
-        //    var comments = _context.Comments.Include(p => p.CurrNews);
-        //    foreach (var obj0 in comments)
-        //    {
-        //        obj0.CurrNews.Comments = null;
-        //        obj0.CurrNews.Categories = null;
-        //    }
-
-        //    return Ok(comments);
-        //}
-
+        ///<summary>Returning all the comments</summary>
+        ///<returns>All the comments</returns>
+        ///<response code="200">Returning all the comments</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Comment>>> GetComments()
         {
             return Ok(await _context.Comments.Select(p => new { p.Id, p.WriterName, p.TimeWrite, p.Text, p.CurrNewsId }).AsNoTracking().ToListAsync());
         }
 
-        // GET: api/Comments/5
+        ///<summary>Returning the comment with the unique ID</summary>
+        ///<param name="id"></param>
+        ///<response code="404">There is no comment with pointed ID!</response>
+        ///<response code="200">Returning the comment with the unique ID</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<Comment>> GetComment(int id)
         {
             var comments = await _context.Comments.Where(p => p.Id == id).Select(p=> new { p.Id, p.WriterName, p.TimeWrite, p.Text, p.CurrNewsId }).AsNoTracking().ToListAsync();
 
             if (comments.Count == 0)
-                return NotFound();
+                return NotFound("There is no cooment with pointed ID!");
 
             return Ok(comments);
         }
 
-        /* PUT: api/Comments/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutComment(int id, Comment comment)
-        //{
-        //    if (id != comment.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(comment).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!CommentExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}*/
-
+        ///<summary>Updating the comment with unique ID</summary>
+        ///<response code="400">The entity you pointed doesn't exist!</response>
+        ///<response code="204">The comment was successfully changed!</response>
+        ///<remarks>
+        ///
+        ///Sample request:
+        ///
+        ///    {
+        ///         "id": 1,
+        ///         "WriterName": "The changed Name!",
+        ///         "TimeWrite": "12.31.1999",
+        ///         "Text": "Some changed text.",
+        ///         "CurrNewsId": 1
+        ///    }
+        /// </remarks>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PutComment(int id, [Bind("Id", "WriterName", "TimeWrite", "Text", "CurrNewsId")] Comment comment)
         {
             if (id != comment.Id)
             {
-                return BadRequest();
+                return BadRequest("The comment you pointed doesn't exist!");
             }
 
             var news = _context.News;
@@ -98,59 +80,57 @@ namespace NewsApi.Controllers
 
             _context.Entry(comment).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CommentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        // POST: api/Comments
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        ///<summary>Creating a new comment's entity</summary>
+        ///<response code="400">There is no entities with pointed ID!</response>
+        ///<response code="201">Returning the comment which was created</response>
+        ///<remarks>
+        ///Sample request:
+        ///
+        ///    {
+        ///         "WriterName": "The created Name",
+        ///         "TimeWrite": "12.31.1999",
+        ///         "Text": "Some created text!",
+        ///         "CurrNewsId": 1
+        ///    }
+        /// </remarks>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Comment>> PostComment([Bind("WriterName", "Text", "CurrNewsId")]Comment comment)
         {
             comment.TimeWrite = DateTime.Now;
             comment.CurrNews = await _context.News.FindAsync(comment.CurrNewsId);
             if (comment.CurrNews == null)
-                return BadRequest();
+                return BadRequest("There is no news with pointed ID!");
             _context.Comments.Add(comment);
             _context.SaveChanges();
 
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, "Created comment ID is " + comment.Id);
         }
 
-        // DELETE: api/Comments/5
+        ///<summary>Deleting the comment with unique ID</summary>
+        ///<param name="id"></param>
+        ///<response code="404">There is no comment with pointed ID!</response>
+        ///<response code="204">Returning NoContent in case of success</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            var comment = await _context.Comments.FindAsync(id);
-            if (comment == null)
+            var comment = _context.Comments.Where(p=>p.Id == id);
+            if (!await comment.AnyAsync())
             {
-                return NotFound();
+                return NotFound("There is no comment with pointed ID!");
             }
 
-            _context.Comments.Remove(comment);
+            _context.Comments.Remove(comment.First());
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool CommentExists(int id)
-        {
-            return _context.Comments.Any(e => e.Id == id);
         }
     }
 }

@@ -33,7 +33,6 @@ namespace NewsApi.Controllers
 
         ///<summary>Returning the news with the unique ID</summary>
         ///<param name="id"></param>
-        ///<returns>The news with the unique ID</returns>
         ///<response code="404">There is no news with pointed ID!</response>
         ///<response code="200">Returning the news with the unique ID</response>
         [HttpGet("{id}")]
@@ -49,7 +48,6 @@ namespace NewsApi.Controllers
         }
 
         ///<summary>Updating the News with unique ID</summary>
-        ///<returns>NoContent</returns>
         ///<response code="400">The entity you pointed doesn't exist!</response>
         ///<response code="204">The news was successfully changed!</response>
         ///<remarks>
@@ -110,7 +108,6 @@ namespace NewsApi.Controllers
         }
 
         ///<summary>Creating a new News entity</summary>
-        ///<returns>Created news</returns>
         ///<response code="400">There is no entities with pointed ID!</response>
         ///<response code="201">Returning the news which was created</response>
         ///<remarks>
