@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NewsApi.Models.DTO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -12,6 +13,15 @@ namespace NewsApi.Models
     /// </summary>
     public class Comment
     {
+        public Comment() { }
+        public Comment(CommentDTO comment)
+        {
+            this.Id = comment.Id;
+            this.WriterName = comment.WriterName;
+            this.Text = comment.Text;
+            this.TimeWrite = comment.TimeWrite;
+            this.CurrNewsId = comment.CurrNewsId;
+        }
         public int Id { get; set; }
         /// <summary>
         /// User that wrote the comment

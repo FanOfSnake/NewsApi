@@ -9,6 +9,7 @@ using System.Reflection;
 using System.IO;
 using NewsApi.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace NewsApi
 {
@@ -49,6 +50,11 @@ namespace NewsApi
                 c.IncludeXmlComments(xmlPath);
             });
 
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+                });
             
         }
 
@@ -61,6 +67,10 @@ namespace NewsApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "NewsApi v1"));
             }
+
+            // внерение авторизации и аутентификации
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseHttpsRedirection();
 
