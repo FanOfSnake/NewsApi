@@ -11,14 +11,13 @@ namespace NewsApi.Models
         public DbSet<News> News { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<User> Users { get;set; }
+        public NewsContext(DbContextOptions<NewsContext> options): base(options) => Database.EnsureCreated();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=myNewsDB;Trusted_Connection=True;");
             optionsBuilder.LogTo(message => System.Diagnostics.Debug.WriteLine(message), Microsoft.Extensions.Logging.LogLevel.Information);
         }
-
-        public NewsContext () => Database.EnsureCreated();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
@@ -90,6 +89,22 @@ namespace NewsApi.Models
 
                 entity.Ignore(e => e.CategoriesId);
                 entity.Ignore(e => e.CommentsId);
+            });
+
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .IsClustered(true);
+                entity.Property(e => e.Login)
+                    .HasMaxLength(30)
+                    .IsRequired(true)
+                    .HasDefaultValue("Some login");
+
+                entity.Property(e => e.Password)
+                    .HasMaxLength(32)
+                    .IsRequired(true)
+                    .HasDefaultValue("Some password");
+
             });
 
             OnModelCreatingPartial(modelBuilder);

@@ -8,6 +8,7 @@ using System;
 using System.Reflection;
 using System.IO;
 using NewsApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace NewsApi
 {
@@ -25,8 +26,8 @@ namespace NewsApi
         {
 
             services.AddControllers().AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
-            services.AddDbContext<NewsContext>();
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+            services.AddDbContext<NewsContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc(

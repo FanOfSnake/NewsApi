@@ -50,7 +50,7 @@ namespace NewsApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<NewsDTO>> GetNews(int id)
-        {
+        { 
             var news = _context.News.Include(p => p.Categories).Include(p => p.Comments).Where(p => p.Id == id);
             if (!news.Any())
                 return NotFound("There is no news with pointed ID!");
