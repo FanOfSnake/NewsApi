@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NewsApi.Models;
+using NewsApi.Models.DTO;
 
 namespace NewsApi.Controllers
 {
@@ -26,9 +27,19 @@ namespace NewsApi.Controllers
         ///<response code="200">Returning all the news</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<News>>> GetNews()
+        public async Task<ActionResult<IEnumerable<NewsDTO>>> GetNews()
         {
-            return Ok(await _context.News.Include(p=>p.Categories).Include(p=>p.Comments).Select(p=>new { p.Id, p.Img, p.Name, p.ShortDesc, p.TimePublication, p.Text, p.Categories, p.Comments }).AsNoTracking().ToListAsync());
+            var news = await _context.News.Include(p => p.Categories).Include(p => p.Comments).ToListAsync();
+            List<NewsDTO> newsDTO = new List<NewsDTO>();
+            foreach (var OneNews in news)
+            {
+                foreach (var category in OneNews.Categories)
+                    OneNews.CategoriesId.Add(category.Id);
+                foreach (var comment in OneNews.Comments)
+                    OneNews.CommentsId.Add(comment.Id);
+                newsDTO.Add(new NewsDTO(OneNews));
+            }
+            return Ok(newsDTO);
         }
 
         ///<summary>Returning the news with the unique ID</summary>
@@ -38,13 +49,18 @@ namespace NewsApi.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<News>> GetNews(int id)
+        public async Task<ActionResult<NewsDTO>> GetNews(int id)
         {
-
-            var news = _context.News.Include(p => p.Categories).Include(p => p.Comments).Where(p => p.Id == id).Select(p => new { p.Id, p.Img, p.Name, p.ShortDesc, p.TimePublication, p.Text, p.Categories, p.Comments });
+            var news = _context.News.Include(p => p.Categories).Include(p => p.Comments).Where(p => p.Id == id);
             if (!news.Any())
                 return NotFound("There is no news with pointed ID!");
-            return Ok(await news.FirstAsync());
+
+            foreach (var category in news.First().Categories)
+                news.First().CategoriesId.Add(category.Id);
+            foreach (var comment in news.First().Comments)
+                news.First().CommentsId.Add(comment.Id);
+
+            return Ok(new NewsDTO(await news.FirstAsync()));
         }
 
         ///<summary>Updating the News with unique ID</summary>
@@ -57,6 +73,7 @@ namespace NewsApi.Controllers
         ///    {
         ///         "id": 1,
         ///         "Name": "The changed Name!",
+        ///         "Img": "SomeURL for img",
         ///         "ShortDesc": "Some changed descryption.",
         ///         "Text": "Some changed text.",
         ///         "TimePublication": "12.31.1999",
@@ -68,7 +85,7 @@ namespace NewsApi.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PutNews(int id,[Bind("Img", "Name", "ShortDesc", "Text", "TimePublication", "CategoriesId", "CommentsId")] News news)
+        public async Task<IActionResult> PutNews(int id,NewsDTO news)
         {
             if (id != news.Id)
             {
@@ -115,6 +132,7 @@ namespace NewsApi.Controllers
         ///
         ///    {
         ///         "Name": "The created Name!",
+        ///         "Img": "SomeURL for img",
         ///         "ShortDesc": "Some created descryption.",
         ///         "Text": "Some created text.",
         ///         "TimePublication": "12.31.1999",
@@ -125,8 +143,9 @@ namespace NewsApi.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<News>> PostNews([Bind("Name", "Img", "ShortDesc", "Text", "CategoriesId", "CommentsId")] News news)
+        public async Task<ActionResult<News>> PostNews(NewsDTO newsDTO)
         {
+            News news = new News(newsDTO);
             // добавляем неопределенные значения
             news.TimePublication = DateTime.Now;
 
@@ -150,7 +169,7 @@ namespace NewsApi.Controllers
             _context.News.Add(news);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetNews), new { id = news.Id }, "Created news' ID is " + news.Id);
+            return CreatedAtAction(nameof(GetNews), new { id = news.Id }, new NewsDTO(news));
         }
 
         ///<summary>Deleting the News with unique ID</summary>

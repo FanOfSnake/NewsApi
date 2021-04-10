@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NewsApi.Models;
+using NewsApi.Models.DTO;
 
 namespace NewsApi.Controllers
 {
@@ -26,13 +27,20 @@ namespace NewsApi.Controllers
         ///<response code="200">Returning all the categories</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
         {
             var categories = _context.Categories.Include(p => p.News);
             foreach (var category in categories)
                 foreach (var news in category.News)
                     category.NewsId.Add(news.Id);
-            return Ok(await categories.Select(p => new { p.Id, p.Name, p.Desc, p.NewsId }).ToListAsync());
+            return Ok(await categories
+                .Select(p => new CategoryDTO{
+                    Id = p.Id,
+                    Name = p.Name,
+                    Desc = p.Desc,
+                    NewsId = p.NewsId
+                })
+                .ToListAsync());
         }
 
         ///<summary>Returning the category with the unique ID</summary>
@@ -42,15 +50,22 @@ namespace NewsApi.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Category>> GetCategory(int id)
-        {
+        public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
+        {                       
             var category = _context.Categories.Include(p => p.News).Where(p=>p.Id == id);
             if (!category.Any())
                 return NotFound("There is no category with pointed ID!");
             foreach (var i in category.First().News)
                 category.First().NewsId.Add(i.Id);
 
-            return Ok(await category.Select(p => new { p.Id, p.Name, p.Desc, p.NewsId }).ToListAsync());
+            return Ok(await category
+                .Select(p => new CategoryDTO{
+                    Id = p.Id,
+                    Name = p.Name,
+                    Desc = p.Desc,
+                    NewsId = p.NewsId 
+                })
+                .ToListAsync());
         }
 
         ///<summary>Updating the category with unique ID</summary>
@@ -70,7 +85,7 @@ namespace NewsApi.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PutCategory(int id, [Bind("Id", "Name", "Desc", "NewsId")]Category category)
+        public async Task<IActionResult> PutCategory(int id, CategoryDTO category)
         {
             if (id != category.Id)
             {
@@ -83,7 +98,7 @@ namespace NewsApi.Controllers
                 if (!news.Where(p => p.Id == i).Any())
                     return BadRequest("The News you pointed doesn't exist!");
 
-            var OldCategory = _context.Categories.Include(p=>p.News).Where(p=>p.Id == category.Id).FirstOrDefault();
+            var OldCategory = _context.Categories.Include(p => p.News).Where(p => p.Id == category.Id).FirstOrDefault();
             OldCategory.News.Clear();
 
             foreach (var i in category.NewsId)
@@ -112,21 +127,21 @@ namespace NewsApi.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory([Bind("Name", "Decs", "NewsId")]Category category)
+        public async Task<ActionResult<Category>> PostCategory(CategoryDTO categoryDTO)
         {
             var news = await _context.News.Include(p => p.Categories).ToListAsync();
+            Category category = new Category(categoryDTO);
             foreach (int i in category.NewsId)
             {
-                var OneNews = news.Find(p => p.Id == i);
-                if (OneNews == null)
+                var OneNews = news.Where(p=>p.Id == i);
+                if (!OneNews.Any())
                     return BadRequest("There is no news with pointed ID!");
-                category.News.Add(OneNews);
+                category.News.Add(OneNews.FirstOrDefault());
             }
             _context.Categories.Add(category);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, "Created category's ID is " + category.Id);
+            return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, new CategoryDTO(category));
         }
 
         ///<summary>Deleting the category with unique ID</summary>

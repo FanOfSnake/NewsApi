@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using NewsApi.Models.DTO;
 
 namespace NewsApi.Models
 {
@@ -13,6 +14,22 @@ namespace NewsApi.Models
     /// </summary>
     public class News
     {
+        public News ()
+        {
+            this.CategoriesId = new List<int>();
+            this.CommentsId = new List<int>();
+        }
+        public News (NewsDTO news)
+        {
+            this.Id = news.Id;
+            this.Img = news.Img;
+            this.Name = news.Name;
+            this.ShortDesc = news.ShortDesc;
+            this.TimePublication = news.TimePublication;
+            this.Text = news.Text;
+            this.CommentsId = news.CommentsId;
+            this.CategoriesId = news.CategoriesId;
+        }
         public int Id { get; set; }
         /// <summary>
         /// Url for the New's img
@@ -42,7 +59,7 @@ namespace NewsApi.Models
         /// The new's comments
         /// </summary>
         public List<Comment> Comments { get; set; } = new List<Comment>();
-        public int[] CategoriesId { get; set; }
-        public int[] CommentsId { get; set; }
+        public List<int> CategoriesId { get; set; }
+        public List<int> CommentsId { get; set; }
     }
 }

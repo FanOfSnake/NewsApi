@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NewsApi.Models.DTO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -12,6 +13,19 @@ namespace NewsApi.Models
     /// </summary>
     public class Category
     {
+        public Category()
+        {
+            News = new List<News>();
+            NewsId = new List<int>();
+        }
+        public Category (CategoryDTO category)
+        {
+            this.Id = category.Id;
+            this.Name = category.Name;
+            this.Desc = category.Desc;
+            this.NewsId = category.NewsId;
+            News = new List<News>();
+        }
         public int Id { get; set; }
         /// <summary>
         /// Name of the category
@@ -25,8 +39,8 @@ namespace NewsApi.Models
         /// <summary>
         /// News that belongs to the category
         /// </summary>
-        public List<News> News { get; set; } = new List<News>();
+        public List<News> News { get; set; }
         // айдишники новостей для поста
-        public List<int> NewsId { get; set; } = new List<int>();
+        public List<int> NewsId { get; set; }
     }
 }

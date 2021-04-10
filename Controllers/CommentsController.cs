@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NewsApi.Models;
+using NewsApi.Models.DTO;
 
 namespace NewsApi.Controllers
 {
@@ -26,9 +27,20 @@ namespace NewsApi.Controllers
         ///<response code="200">Returning all the comments</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetComments()
+        public async Task<ActionResult<IEnumerable<CommentDTO>>> GetComments()
         {
-            return Ok(await _context.Comments.Select(p => new { p.Id, p.WriterName, p.TimeWrite, p.Text, p.CurrNewsId }).AsNoTracking().ToListAsync());
+            return Ok(
+                await _context
+                .Comments
+                .Select(p => new CommentDTO { 
+                    Id =p.Id, 
+                    WriterName = p.WriterName, 
+                    TimeWrite = p.TimeWrite, 
+                    Text = p.Text, 
+                    CurrNewsId = p.CurrNewsId 
+                }).AsNoTracking()
+                .ToListAsync()
+                );
         }
 
         ///<summary>Returning the comment with the unique ID</summary>
@@ -38,12 +50,24 @@ namespace NewsApi.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Comment>> GetComment(int id)
+        public async Task<ActionResult<CommentDTO>> GetComment(int id)
         {
-            var comments = await _context.Comments.Where(p => p.Id == id).Select(p=> new { p.Id, p.WriterName, p.TimeWrite, p.Text, p.CurrNewsId }).AsNoTracking().ToListAsync();
+            var comments = await _context
+                .Comments
+                .Where(p=>p.Id == id)
+                .Select(p => new CommentDTO()
+                {
+                    Id = p.Id,
+                    WriterName = p.WriterName,
+                    Text = p.Text,
+                    TimeWrite = p.TimeWrite,
+                    CurrNewsId = p.CurrNewsId
+                })
+                .AsNoTracking()
+                .ToListAsync();
 
             if (comments.Count == 0)
-                return NotFound("There is no cooment with pointed ID!");
+                return NotFound("There is no comment with pointed ID!");
 
             return Ok(comments);
         }
