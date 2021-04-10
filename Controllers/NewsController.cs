@@ -21,28 +21,37 @@ namespace NewsApi.Controllers
             _context = context;
         }
 
-        ///<summary>Returning all the News</summary>
+        ///<summary>Returning all the news</summary>
+        ///<returns>All the news</returns>
+        ///<response code="200">Returning all the news</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<News>>> GetNews()
         {
             return Ok(await _context.News.Include(p=>p.Categories).Include(p=>p.Comments).Select(p=>new { p.Id, p.Img, p.Name, p.ShortDesc, p.TimePublication, p.Text, p.Categories, p.Comments }).AsNoTracking().ToListAsync());
         }
 
-        ///<summary>Returning the News with unique ID</summary>
+        ///<summary>Returning the news with the unique ID</summary>
         ///<param name="id"></param>
-        // GET: api/News/5
+        ///<returns>The news with the unique ID</returns>
+        ///<response code="404">There is no news with pointed ID!</response>
+        ///<response code="200">Returning the news with the unique ID</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<News>> GetNews(int id)
         {
 
-            var news = await _context.News.Include(p => p.Categories).Include(p => p.Comments).Where(p => p.Id == id).Select(p => new { p.Id, p.Img, p.Name, p.ShortDesc, p.TimePublication, p.Text, p.Categories, p.Comments }).FirstAsync();
-            if (news == null)
-                return NotFound();
-            return Ok(news);
+            var news = _context.News.Include(p => p.Categories).Include(p => p.Comments).Where(p => p.Id == id).Select(p => new { p.Id, p.Img, p.Name, p.ShortDesc, p.TimePublication, p.Text, p.Categories, p.Comments });
+            if (!news.Any())
+                return NotFound("There is no news with pointed ID!");
+            return Ok(await news.FirstAsync());
         }
 
         ///<summary>Updating the News with unique ID</summary>
-        ///<param name="id"></param>
+        ///<returns>NoContent</returns>
+        ///<response code="400">The entity you pointed doesn't exist!</response>
+        ///<response code="204">The news was successfully changed!</response>
         ///<remarks>
         ///
         ///Sample request:
@@ -52,17 +61,20 @@ namespace NewsApi.Controllers
         ///         "Name": "The changed Name!",
         ///         "ShortDesc": "Some changed descryption.",
         ///         "Text": "Some changed text.",
-        ///         "TimePublication": "31.12.1999 23:59:59",
-        ///         "CategoriesId": []
+        ///         "TimePublication": "12.31.1999",
+        ///         "CategoriesId": [],
         ///         "CommentsId": []
         ///    }
         /// </remarks>
+        /// 
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PutNews(int id,[Bind("Img", "Name", "ShortDesc", "Text", "TimePublication", "CategoriesId", "CommentsId")] News news)
         {
             if (id != news.Id)
             {
-                return BadRequest();
+                return BadRequest("There is no news with ID You pointed");
             }
 
             var categories = _context.Categories;
@@ -98,7 +110,24 @@ namespace NewsApi.Controllers
         }
 
         ///<summary>Creating a new News entity</summary>
+        ///<returns>Created news</returns>
+        ///<response code="400">There is no entities with pointed ID!</response>
+        ///<response code="201">Returning the news which was created</response>
+        ///<remarks>
+        ///Sample request:
+        ///
+        ///    {
+        ///         "Name": "The created Name!",
+        ///         "ShortDesc": "Some created descryption.",
+        ///         "Text": "Some created text.",
+        ///         "TimePublication": "12.31.1999",
+        ///         "CategoriesId": [],
+        ///         "CommentsId": []
+        ///    }
+        /// </remarks>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<News>> PostNews([Bind("Name", "Img", "ShortDesc", "Text", "CategoriesId", "CommentsId")] News news)
         {
             // добавляем неопределенные значения
@@ -110,14 +139,14 @@ namespace NewsApi.Controllers
             {
                 var category = categories.Find(p => p.Id == i);
                 if (category == null)
-                    return BadRequest();
+                    return BadRequest("The categories you pointed doesn't exist!");
                 news.Categories.Add(category);
             }
             foreach (int i in news.CommentsId)
             {
                 var comment = comments.Find(p => p.Id == i);
                 if(comment ==null)
-                    return BadRequest();
+                    return BadRequest("The comments you pointed doesn't exist!");
                 news.Comments.Add(comment);
             }
 
@@ -128,26 +157,25 @@ namespace NewsApi.Controllers
         }
 
         ///<summary>Deleting the News with unique ID</summary>
+        ///<param name="id"></param>
+        ///<returns>NoContent in case of success</returns>
+        ///<response code="404">There is no news with pointed ID!</response>
+        ///<response code="204">Returning NoContent in case of success</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteNews(int id)
         {
-            var news = await _context.News.Include(d=>d.Comments).Where(p=>p.Id == id).FirstOrDefaultAsync();
-            if (news == null)
-            {
-                return NotFound();
-            }
-            foreach (var i in news.Comments)
+            var news = _context.News.Include(d=>d.Comments).Where(p=>p.Id == id);
+            if (!await news.AnyAsync())
+                return NotFound("There is no news with pointed ID!");
+            foreach (var i in news.First().Comments)
                 _context.Comments.Remove(i);
-            news.Comments.Clear();
-            _context.News.Remove(news);
+            news.First().Comments.Clear();
+            _context.News.Remove(news.First());
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool NewsExists(int id)
-        {
-            return _context.News.Any(e => e.Id == id);
         }
     }
 }

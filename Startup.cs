@@ -7,7 +7,6 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Reflection;
 using System.IO;
-using Microsoft.OpenApi.Models;
 using NewsApi.Models;
 
 namespace NewsApi

@@ -7,20 +7,29 @@ using System.Text;
 
 namespace NewsApi.Models
 {
+    /// <summary>
+    /// Comment's entity
+    /// </summary>
     public class Comment
     {
         public int Id { get; set; }
-        [Required]
-        [DefaultValue("Some cool Writer")]
+        /// <summary>
+        /// User that wrote the comment
+        /// </summary>
         public string WriterName { get; set; }
-        [Required]
-        [DefaultValue("Some cool comment text!")]
+        /// <summary>
+        /// The text of the comment
+        /// </summary>
         public string Text { get; set; }
-        [DefaultValue("01.01.2000")]
+        /// <summary>
+        /// The time comment was published
+        /// </summary>
         public DateTime TimeWrite { get; set; }
         // новость, к которой относиться данный комментарий
+        /// <summary>
+        /// The target news of the comment
+        /// </summary>
         public News CurrNews { get; set; }
-        [Required]
         // айдишник новости 
         public int CurrNewsId { get; set; }
     }

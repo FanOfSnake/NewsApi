@@ -12,9 +12,11 @@ namespace NewsApi.Models
         public DbSet<Category> Categories { get; set; }
         public DbSet<Comment> Comments { get; set; }
 
-        //public DbSet<CategoryNews> CategoryNews { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=myNewsDB;Trusted_Connection=True;");
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=myNewsDB;Trusted_Connection=True;");
+            optionsBuilder.LogTo(message => System.Diagnostics.Debug.WriteLine(message), Microsoft.Extensions.Logging.LogLevel.Information);
+        }
 
         public NewsContext () => Database.EnsureCreated();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,52 +25,72 @@ namespace NewsApi.Models
 
             modelBuilder.Entity<Category>(entity =>
             {
-                entity.Property(e => e.Desc).HasMaxLength(100);
+                entity.HasKey(e => e.Id)
+                .IsClustered();
 
                 entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(30);
+                .IsRequired()
+                .HasMaxLength(30)
+                .HasDefaultValue("Some cool name!");
+
+                entity.Property(e => e.Desc)
+                .HasMaxLength(100)
+                .HasDefaultValue("Some cool description!");
+
+                entity.Ignore(e => e.NewsId);
+
             });
-
-            
-            /*modelBuilder.Entity<CategoryNews>(entity =>
-            //{
-            //    entity.HasKey(e => new { e.CategoriesId, e.NewsId });
-
-            //    entity.HasIndex(e => e.NewsId, "IX_CategoryNews_NewsId");
-
-            //});*/
 
             modelBuilder.Entity<Comment>(entity =>
             {
                 entity.HasIndex(e => e.CurrNewsId, "IX_Comments_CurrNewsId");
 
-                entity.Property(e => e.Text).IsRequired();
+                entity.Property(e => e.CurrNewsId)
+                .IsRequired();
+
+                entity.Property(e => e.Text)
+                .IsRequired()
+                .HasDefaultValue("Some cool comment text!");
+
+                entity.Property(e => e.TimeWrite)
+                .HasDefaultValue<DateTime>(new DateTime (2003,2,17));
 
                 entity.Property(e => e.WriterName)
                     .IsRequired()
-                    .HasMaxLength(30);
-
-                //entity.HasOne(d => d.CurrNews)
-                //    .WithMany(p => p.Comments)
-                //    .HasForeignKey(d => d.CurrNewsId)
-                //    .OnDelete(DeleteBehavior.ClientSetNull);
+                    .HasMaxLength(30)
+                    .HasDefaultValue("Some cool Writer");
             });
 
             modelBuilder.Entity<News>(entity =>
             {
-                entity.Property(e => e.Img).HasMaxLength(100);
+                entity.HasKey(e => e.Id)
+                    .IsClustered();
 
-                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.Img)
+                    .HasMaxLength(100)
+                    .IsRequired(false)
+                    .HasDefaultValue("Some img url");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasDefaultValue("Some cool name!");
 
                 entity.Property(e => e.ShortDesc)
                     .IsRequired()
-                    .HasMaxLength(100);
+                    .HasMaxLength(100)
+                    .HasDefaultValue("Some cool descripton!");
 
-                entity.Property(e => e.Text).IsRequired();
+                entity.Property(e => e.Text)    
+                    .IsRequired()
+                    .HasDefaultValue("Some cool text!");
+
+                entity.Property(e => e.TimePublication)
+                .IsRequired()
+                .HasDefaultValue<DateTime>(new DateTime(2003, 02, 17));
+
+                entity.Ignore(e => e.CategoriesId);
+                entity.Ignore(e => e.CommentsId);
             });
-
-            //modelBuilder.Entity<CategoryNews>().ToTable("CategoryNews");
 
             OnModelCreatingPartial(modelBuilder);
         }

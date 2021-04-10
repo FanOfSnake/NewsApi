@@ -8,30 +8,41 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NewsApi.Models
 {
+    /// <summary>
+    /// News' entity
+    /// </summary>
     public class News
     {
         public int Id { get; set; }
-        [DefaultValue("SomeUrl")]
+        /// <summary>
+        /// Url for the New's img
+        /// </summary>
         public string Img { get; set; }
-        [Required]
-        [DefaultValue("Some cool name!")]
+        /// <summary>
+        /// The name of the news
+        /// </summary>
         public string Name { get; set; }
-        [DefaultValue("Some cool descrypton!")]
+        /// <summary>
+        /// The short description for the news
+        /// </summary>
         public string ShortDesc { get; set; }
-        [Required]
-        [DefaultValue("Some cool text!")]
+        /// <summary>
+        /// The text of the news
+        /// </summary>
         public string Text { get; set; }
-        [DefaultValue("01.01.2000")]
+        /// <summary>
+        /// The publication time of the news
+        /// </summary>
         public DateTime TimePublication { get; set; }
-        // категории данной новости
+        /// <summary>
+        /// The new's categories
+        /// </summary>
         public List<Category> Categories { get; set; } = new List<Category>();
-        // комменты данной новости
+        /// <summary>
+        /// The new's comments
+        /// </summary>
         public List<Comment> Comments { get; set; } = new List<Comment>();
-
-        // id комментариев и категорий для быстрого их создания
-        [NotMapped]
         public int[] CategoriesId { get; set; }
-        [NotMapped]
         public int[] CommentsId { get; set; }
     }
 }

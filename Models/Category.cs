@@ -7,18 +7,26 @@ using System.Text;
 
 namespace NewsApi.Models
 {
+    /// <summary>
+    /// Category's entity
+    /// </summary>
     public class Category
     {
         public int Id { get; set; }
-        [Required]
-        [DefaultValue("Some cool name!")]
+        /// <summary>
+        /// Name of the category
+        /// </summary>
         public string Name { get; set; }
-        [DefaultValue("Some cool descrypton!")]
+        /// <summary>
+        /// Description for the category
+        /// </summary>
         public string Desc { get; set; }
         // Новости данной катеории
+        /// <summary>
+        /// News that belongs to the category
+        /// </summary>
         public List<News> News { get; set; } = new List<News>();
         // айдишники новостей для поста
-        [NotMapped]
         public List<int> NewsId { get; set; } = new List<int>();
     }
 }

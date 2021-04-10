@@ -9,7 +9,7 @@ using NewsApi.Models;
 
 namespace NewsApi.Controllers
 {
-    //1) ПРРОБЛЕМА С ПУТОМ - ДУБЛИКАЦИЯ КЛЮЧЕЙ В ДОП ТАБЛИЦЕ - ПОПРОУЙ ЕЕ ПРОСТО ОЧИЩАТЬ ОТ ДАННФХ С ОПРЕДЕЛЕННЫМ АЙДИ
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoriesController : ControllerBase
@@ -20,21 +20,11 @@ namespace NewsApi.Controllers
         {
             _context = context;
         }
-
-        /* GET: api/Categories
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
-        //{
-        //    var categories = _context.Categories.Include(p => p.News);
-        //    foreach(var obj0 in categories)
-        //        foreach(var obj1 in obj0.News)
-        //        {
-        //            obj1.Categories = null;
-        //            obj1.Comments = null;
-        //        }
-        //    return Ok(categories);
-        //}*/
-
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
@@ -122,7 +112,7 @@ namespace NewsApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Category>> PostCategory([Bind("Name", "Decs", "NewsId")]Category category)
         {
-            var news = _context.News.Include(p => p.Categories).ToList();
+            var news = await _context.News.Include(p => p.Categories).ToListAsync();
             foreach (int i in category.NewsId)
             {
                 var OneNews = news.Find(p => p.Id == i);

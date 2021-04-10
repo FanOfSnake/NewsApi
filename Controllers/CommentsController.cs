@@ -123,7 +123,7 @@ namespace NewsApi.Controllers
         public async Task<ActionResult<Comment>> PostComment([Bind("WriterName", "Text", "CurrNewsId")]Comment comment)
         {
             comment.TimeWrite = DateTime.Now;
-            comment.CurrNews = _context.News.Find(comment.CurrNewsId);
+            comment.CurrNews = await _context.News.FindAsync(comment.CurrNewsId);
             if (comment.CurrNews == null)
                 return BadRequest();
             _context.Comments.Add(comment);
