@@ -12,8 +12,10 @@ namespace NewsApi.Models
         public DbSet<Category> Categories { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<User> Users { get;set; }
-        public NewsContext(DbContextOptions<NewsContext> options): base(options) => Database.EnsureCreated();
-
+        public NewsContext(DbContextOptions<NewsContext> options) : base(options)
+        {
+            Database.EnsureCreated();
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.LogTo(message => System.Diagnostics.Debug.WriteLine(message), Microsoft.Extensions.Logging.LogLevel.Information);
