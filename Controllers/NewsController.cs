@@ -143,7 +143,7 @@ namespace NewsApi.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<News>> PostNews(NewsDTO newsDTO)
+        public async Task<ActionResult<NewsDTO>> PostNews(NewsDTO newsDTO)
         {
             News news = new News(newsDTO);
             // добавляем неопределенные значения

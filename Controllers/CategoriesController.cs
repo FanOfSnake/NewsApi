@@ -127,7 +127,7 @@ namespace NewsApi.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Category>> PostCategory(CategoryDTO categoryDTO)
+        public async Task<ActionResult<CategoryDTO>> PostCategory(CategoryDTO categoryDTO)
         {
             var news = await _context.News.Include(p => p.Categories).ToListAsync();
             Category category = new Category(categoryDTO);

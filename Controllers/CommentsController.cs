@@ -90,8 +90,9 @@ namespace NewsApi.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PutComment(int id, [Bind("Id", "WriterName", "TimeWrite", "Text", "CurrNewsId")] Comment comment)
+        public async Task<IActionResult> PutComment(int id, CommentDTO commentDTO)
         {
+            Comment comment = new Comment(commentDTO);
             if (id != comment.Id)
             {
                 return BadRequest("The comment you pointed doesn't exist!");
@@ -124,8 +125,10 @@ namespace NewsApi.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Comment>> PostComment([Bind("WriterName", "Text", "CurrNewsId")]Comment comment)
+        public async Task<ActionResult<CommentDTO>> PostComment(CommentDTO commentDTO)
         {
+            Comment comment = new Comment(commentDTO);
+
             comment.TimeWrite = DateTime.Now;
             comment.CurrNews = await _context.News.FindAsync(comment.CurrNewsId);
             if (comment.CurrNews == null)
@@ -133,7 +136,8 @@ namespace NewsApi.Controllers
             _context.Comments.Add(comment);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, "Created comment ID is " + comment.Id);
+
+            return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, new CommentDTO(comment));
         }
 
         ///<summary>Deleting the comment with unique ID</summary>
