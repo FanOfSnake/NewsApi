@@ -45,7 +45,8 @@ namespace NewsApi.Controllers.Auth
             var response = new
             {
                 accec_token = encodedJwt,
-                User = identity.Name
+                User = identity.Name,
+                Role = identity.Claims.FirstOrDefault().Value
             };
 
             return Json(response);
