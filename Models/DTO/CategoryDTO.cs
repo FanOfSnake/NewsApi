@@ -7,6 +7,9 @@ namespace NewsApi.Models.DTO
 {
     public class CategoryDTO
     {
+        /// <summary>
+        /// Category's entity
+        /// </summary>
         public CategoryDTO()
         {
         }
@@ -18,8 +21,17 @@ namespace NewsApi.Models.DTO
             this.NewsId = category.NewsId;
         }
         public int Id { get; set; }
+        /// <summary>
+        /// Name of the category
+        /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// Description for the category
+        /// </summary>
         public string Desc { get; set; }
+        /// <summary>
+        /// News that belongs to the category
+        /// </summary>
         public List<int> NewsId { get; set; }
     }
 }

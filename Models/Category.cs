@@ -8,9 +8,6 @@ using System.Text;
 
 namespace NewsApi.Models
 {
-    /// <summary>
-    /// Category's entity
-    /// </summary>
     public class Category
     {
         public Category()
@@ -27,20 +24,9 @@ namespace NewsApi.Models
             News = new List<News>();
         }
         public int Id { get; set; }
-        /// <summary>
-        /// Name of the category
-        /// </summary>
         public string Name { get; set; }
-        /// <summary>
-        /// Description for the category
-        /// </summary>
         public string Desc { get; set; }
-        // Новости данной катеории
-        /// <summary>
-        /// News that belongs to the category
-        /// </summary>
         public List<News> News { get; set; }
-        // айдишники новостей для поста
         public List<int> NewsId { get; set; }
     }
 }
