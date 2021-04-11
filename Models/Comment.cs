@@ -8,9 +8,6 @@ using System.Text;
 
 namespace NewsApi.Models
 {
-    /// <summary>
-    /// Comment's entity
-    /// </summary>
     public class Comment
     {
         public Comment() { }
@@ -23,24 +20,10 @@ namespace NewsApi.Models
             this.CurrNewsId = comment.CurrNewsId;
         }
         public int Id { get; set; }
-        /// <summary>
-        /// User that wrote the comment
-        /// </summary>
         public string WriterName { get; set; }
-        /// <summary>
-        /// The text of the comment
-        /// </summary>
         public string Text { get; set; }
-        /// <summary>
-        /// The time comment was published
-        /// </summary>
         public DateTime TimeWrite { get; set; }
-        // новость, к которой относиться данный комментарий
-        /// <summary>
-        /// The target news of the comment
-        /// </summary>
         public News CurrNews { get; set; }
-        // айдишник новости 
         public int CurrNewsId { get; set; }
     }
 }

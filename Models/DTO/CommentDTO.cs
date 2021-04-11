@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace NewsApi.Models.DTO
 {
+    /// <summary>
+    /// Comment's entity
+    /// </summary>
     public class CommentDTO
     {
         public CommentDTO() { }
@@ -17,9 +20,21 @@ namespace NewsApi.Models.DTO
             this.CurrNewsId = comment.CurrNewsId;
         }
         public int Id { get; set; }
+        /// <summary>
+        /// User that wrote the comment
+        /// </summary>
         public string WriterName { get; set; }
+        /// <summary>
+        /// The text of the comment
+        /// </summary>
         public string Text { get; set; }
+        /// <summary>
+        /// The time comment was published
+        /// </summary>
         public DateTime TimeWrite { get; set; }
+        /// <summary>
+        /// The target news of the comment
+        /// </summary>
         public int CurrNewsId { get; set; }
     }
 }
