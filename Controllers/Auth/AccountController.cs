@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using NewsApi.Models;
 using NewsApi.Models.Auth;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,15 @@ namespace NewsApi.Controllers.Auth
 {
     public class AccountController : Controller
     {
-        // временная заглушка вместо данных из БД
-        private List<User> users = new List<User>
+        private readonly NewsContext _context;
+        public AccountController(NewsContext context)
         {
-            new User {Login="admin@gmail.com", Password="ueptkm1933", Role = "admin" },
-            new User { Login="qwerty@gmail.com", Password="Farida2010", Role = "user" }
-        };
+            _context = context;
+            users = _context.Users.ToList();
+        }
+
+        // временная заглушка вместо данных из БД
+        private List<User> users { get; set; }
 
         [HttpPost("/token")]
         public IActionResult Token(string userName, string password)
