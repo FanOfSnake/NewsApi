@@ -98,6 +98,7 @@ namespace NewsApi.Models
             {
                 entity.HasKey(e => e.Id)
                     .IsClustered(true);
+
                 entity.Property(e => e.Login)
                     .HasMaxLength(30)
                     .IsRequired(true)
@@ -107,6 +108,11 @@ namespace NewsApi.Models
                     .HasMaxLength(32)
                     .IsRequired(true)
                     .HasDefaultValue("Some password");
+
+                entity.Property(e => e.Role)
+                    .HasMaxLength(10)
+                    .IsRequired(true)
+                    .HasDefaultValue("user");
 
             });
 
