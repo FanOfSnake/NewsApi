@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NewsApi.Models
+namespace NewsApi.Models.Auth
 {
     public class User
     {
