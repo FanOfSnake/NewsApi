@@ -27,6 +27,13 @@ namespace NewsApi.Models
 
             modelBuilder.Entity<Category>(entity =>
             {
+                entity.HasData(
+                    new Category { Id = 1, Name = "IT", Desc = "Краткое описание категории" },
+                    new Category { Id = 2, Name = "Политика", Desc = "Краткое описание категории" },
+                    new Category { Id = 3, Name = "Книги", Desc = "Краткое описание категории" },
+                    new Category { Id = 4, Name = "Музыка", Desc = "Краткое описание категории" }
+                    );
+
                 entity.HasKey(e => e.Id)
                 .IsClustered();
 
@@ -45,10 +52,15 @@ namespace NewsApi.Models
 
             modelBuilder.Entity<Comment>(entity =>
             {
+                entity.HasData(
+                    new Comment { Id=1, WriterName = "Рамиль", Text = "Молодец! Продолжай в том же духе!", TimeWrite = DateTime.Now, CurrNewsId = 1 },
+                    new Comment { Id = 2, WriterName = "Шаукат", Text = "Спасибо! Очень приятно такое читать)", TimeWrite = DateTime.Now + TimeSpan.FromMinutes(5), CurrNewsId = 1 }
+                    );
+
                 entity.HasIndex(e => e.CurrNewsId, "IX_Comments_CurrNewsId");
 
                 entity.Property(e => e.CurrNewsId)
-                .IsRequired();
+                .IsRequired().HasDefaultValue(1);
 
                 entity.Property(e => e.Text)
                 .IsRequired()
@@ -65,6 +77,13 @@ namespace NewsApi.Models
 
             modelBuilder.Entity<News>(entity =>
             {
+                entity.HasData(
+                    new News { Id = 1, Name = "Шаукат входит в IT-сферу!", ShortDesc = "Краткое описание новости", TimePublication = DateTime.Now },
+                    new News { Id = 2, Name = "Книги о музыке снова популярны!", ShortDesc = "Краткое описание новости", TimePublication = DateTime.Now + TimeSpan.FromDays(1) },
+                    new News { Id = 3, Name = "Навальный использует хакеров для развращения интернета!", ShortDesc = "Краткое описание новости", TimePublication = DateTime.Now + TimeSpan.FromDays(2) },
+                    new News { Id = 4, Name = "Русские шпионы вторгаются в выборы США!", ShortDesc = "Краткое описание новости", TimePublication = DateTime.Now + TimeSpan.FromDays(3) }
+                    );
+
                 entity.HasKey(e => e.Id)
                     .IsClustered();
 
@@ -96,6 +115,12 @@ namespace NewsApi.Models
 
             modelBuilder.Entity<User>(entity =>
             {
+                entity.HasData(
+                    new User { Id= 1, Login = "shaukatk@list.ru", Password = "ueptkm1933", Role = "admin" },
+                    new User { Id= 2, Login = "admin", Password = "admin", Role = "admin" },
+                    new User { Id= 3, Login = "user", Password = "user", Role = "user" }
+                    );
+
                 entity.HasKey(e => e.Id)
                     .IsClustered(true);
 
