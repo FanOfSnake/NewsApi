@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 
 namespace NewsApi.Models.DTO
 {
+    /// <summary>
+    /// Category's entity
+    /// </summary>
     public class CategoryDTO
     {
-        /// <summary>
-        /// Category's entity
-        /// </summary>
+        
         public CategoryDTO()
         {
         }
