@@ -12,6 +12,7 @@ using NewsApi.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsApi
 {
@@ -51,12 +52,6 @@ namespace NewsApi
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
-
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
-                });
 
             // авторизация/аутентиикация
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -99,7 +94,8 @@ namespace NewsApi
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseAuthorization(
+                );
 
             app.UseEndpoints(endpoints =>
             {

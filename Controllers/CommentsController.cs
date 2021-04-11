@@ -28,7 +28,7 @@ namespace NewsApi.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<CommentDTO>>> GetComments()
-        {
+        { 
             return Ok(
                 await _context
                 .Comments

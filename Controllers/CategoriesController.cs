@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -127,8 +129,15 @@ namespace NewsApi.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<CategoryDTO>> PostCategory(CategoryDTO categoryDTO)
         {
+            // проверка на нужный header в запросе
+            HttpContext.Request.Headers.TryGetValue("AccessToken", out var accessToken);
+
+            if(accessToken != "Key")
+                return Unauthorized();
+
             var news = await _context.News.Include(p => p.Categories).ToListAsync();
             Category category = new Category(categoryDTO);
             foreach (int i in category.NewsId)
