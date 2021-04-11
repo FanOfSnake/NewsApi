@@ -32,11 +32,11 @@ namespace NewsApi.Models
                 entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(30)
-                .HasDefaultValue("Some cool name!");
+                .HasDefaultValue("Undefined name");
 
                 entity.Property(e => e.Desc)
                 .HasMaxLength(100)
-                .HasDefaultValue("Some cool description!");
+                .HasDefaultValue("Undefined description");
 
                 entity.Ignore(e => e.NewsId);
 
@@ -51,15 +51,15 @@ namespace NewsApi.Models
 
                 entity.Property(e => e.Text)
                 .IsRequired()
-                .HasDefaultValue("Some cool comment text!");
+                .HasDefaultValue("Undefined comment text");
 
                 entity.Property(e => e.TimeWrite)
-                .HasDefaultValue<DateTime>(new DateTime (2003,2,17));
+                .HasDefaultValue<DateTime>(new DateTime(2003, 2, 17));
 
                 entity.Property(e => e.WriterName)
                     .IsRequired()
                     .HasMaxLength(30)
-                    .HasDefaultValue("Some cool Writer");
+                    .HasDefaultValue("Undefined Writer");
             });
 
             modelBuilder.Entity<News>(entity =>
@@ -70,20 +70,20 @@ namespace NewsApi.Models
                 entity.Property(e => e.Img)
                     .HasMaxLength(100)
                     .IsRequired(false)
-                    .HasDefaultValue("Some img url");
+                    .HasDefaultValue("Undefined img URL");
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasDefaultValue("Some cool name!");
+                    .HasDefaultValue("Undefined name");
 
                 entity.Property(e => e.ShortDesc)
                     .IsRequired()
                     .HasMaxLength(100)
-                    .HasDefaultValue("Some cool descripton!");
+                    .HasDefaultValue("Undefined descripton");
 
-                entity.Property(e => e.Text)    
+                entity.Property(e => e.Text)
                     .IsRequired()
-                    .HasDefaultValue("Some cool text!");
+                    .HasDefaultValue("Undefined text");
 
                 entity.Property(e => e.TimePublication)
                 .IsRequired()
@@ -97,15 +97,21 @@ namespace NewsApi.Models
             {
                 entity.HasKey(e => e.Id)
                     .IsClustered(true);
+
                 entity.Property(e => e.Login)
                     .HasMaxLength(30)
                     .IsRequired(true)
-                    .HasDefaultValue("Some login");
+                    .HasDefaultValue("Undefined Login");
 
                 entity.Property(e => e.Password)
                     .HasMaxLength(32)
                     .IsRequired(true)
-                    .HasDefaultValue("Some password");
+                    .HasDefaultValue("Undefined Password");
+
+                entity.Property(e => e.Role)
+                    .HasMaxLength(10)
+                    .IsRequired(true)
+                    .HasDefaultValue("user");
 
             });
 
